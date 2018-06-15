@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css" />
+    <meta charset="UTF-8">
+    <title>TurtleCoin Supply</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <nav class="navbar is-transparent">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="/">
+      <img src="/img/turtlecoin_wordmark_color@HD.png" alt="TurtleCoin Supply info" width="112" height="40">
+    </a>
+                <div class="navbar-burger burger" data-target="navbarExampleTransparentExample">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div id="navbarExampleTransparentExample" class="navbar-menu">
+                <!--        <div class="navbar-start">
+                    <a class="navbar-item" href="https://turtlecoin.lol/" target="_blank">
+        About TRTL
+      </a>
+     
+                </div> -->
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="field is-grouped">
+                            <p class="control">
+                                <a class="button is-primary" href="https://turtlecoin.lol" target="_blank">
+
+              <span>About TurtleCoin</span>
+            </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <section id="mainmsg">
+            <article class="message is-primary">
+                <div class="message-header">
+                    <p>TurtleCoin.supply</p>
+                </div>
+                <div class="message-body">
+                    <div class="columns">
+                        <div class="column">
+                            Current supply: <strong id="supply"></strong>
+                        </div>
+                        <div class="column">
+                            Current price: <strong id="currentPrice"></strong>
+                        </div>
+                        <div class="column">
+                            Market Cap: <strong id="marketCap"></strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+        <section id="chart">
+            <canvas id="myChart" width="400" height="400"></canvas>
+        </section>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
+    <script src="https://npmcdn.com/Chart.Zoom.js@latest/Chart.Zoom.min.js
+"></script>
+    <script>
+    const numberWithCommas = (x) => {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+
+    function getDates() {
+        return axios.get('/dates.json');
+    }
+
+    function getSupply() {
+        return axios.get('/supply.json');
+    }
+
+    function getCurrentSupply() {
+        return axios.get('https://trtl-explorer.xhub.cloud/q/supply/')
+    }
+
+    function getTurtleCoinPrice() {
+        return axios.get('https://tradeogre.com/api/v1/ticker/BTC-TRTL')
+    }
+
+    function getCurrentBitcoinPrice() {
+        return axios.get('https://api.coindesk.com/v1/bpi/currentprice.json')
+    }
+
+    axios.all([getCurrentSupply(), getTurtleCoinPrice(), getCurrentBitcoinPrice(), getDates(), getSupply()])
+        .then(axios.spread(function(currentSupply, turtleCoinPrice, bitcoinPrice, dates, supply, ) {
+            btc_price = bitcoinPrice.data.bpi.USD.rate_float;
+            trtl_price = turtleCoinPrice.data.price;
+            usdTrtlPrice = (btc_price * trtl_price).toFixed(8);
+            document.querySelector("#supply").innerText = numberWithCommas(currentSupply.data);
+            document.querySelector("#currentPrice").innerText = `$${usdTrtlPrice}`;
+            document.querySelector("#marketCap").innerText = `$${numberWithCommas((usdTrtlPrice*currentSupply.data).toFixed(0))}`;
+
+            var ctx = document.getElementById("myChart").getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.data.dates,
+                    datasets: [{
+                        data: supply.data.supply,
+                        label: "Supply (Billion)",
+                        borderColor: "#3cba9f",
+                        fill: false
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'TurtleCoin Supply in usd Billion'
+                    },
+                    // Container for pan options
+                    // pan: {
+                    //     // Boolean to enable panning
+                    //     enabled: true,
+
+                    //     // Panning directions. Remove the appropriate direction to disable 
+                    //     // Eg. 'y' would only allow panning in the y direction
+                    //     mode: 'xy'
+                    // },
+
+                    // Container for zoom options
+                    zoom: {
+                        // Boolean to enable zooming
+                        enabled: true,
+
+                        // Zooming directions. Remove the appropriate direction to disable 
+                        // Eg. 'y' would only allow zooming in the y direction
+                        mode: 'x',
+                    }
+
+                }
+
+
+            });
+        }));
+    </script>
+</body>
+
+</html>
+<style>
+#mainmsg {
+    margin-top: 3em;
+}
+
+#myChart {
+
+    display: table;
+    margin: 0 auto;
+    margin-top: 2em;
+    max-width: 1000px;
+    max-height: 800px;
+}
+</style>
