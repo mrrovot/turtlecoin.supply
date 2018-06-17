@@ -104,26 +104,29 @@
             document.querySelector("#supply").innerText = numberWithCommas(currentSupply.data);
             document.querySelector("#currentPrice").innerText = `$${usdTrtlPrice}`;
             document.querySelector("#marketCap").innerText = `$${numberWithCommas((usdTrtlPrice*currentSupply.data).toFixed(0))}`;
-            var data = []; var dataSeries = { type: "line" };
+            var data = []; var dataSeries = { type: "line", color: "#3cba9f" };
             var dataPoints = [];
             for (var i = 0; i <= dates.data.dates.length; i++) {
              y = supply.data.supply[i];
              dateTime = new Date(dates.data.dates[i]);
              dataPoints.push({
                  x: dateTime,
-                 y: y
+                 y: y,
+                 lineColor: "#3cba9f",
+                 color: "#3cba9f"
                });
             }
-
-            dataSeries.dataPoints = dataPoints;
             dataSeries.showInLegend = true;
             dataSeries.legendText = "Projected Supply";
+            dataSeries.dataPoints = dataPoints;
+
             data.push(dataSeries);
 
-            var currentPoint = { type: "line", lineThickness: 10 };
-            currentPoint.dataPoints = [{ x: new Date(), y: currentSupply.data / 1000000000}];
+            var currentPoint = { type: "line", lineThickness: 10, color: "#16463c" };
             currentPoint.showInLegend = true;
             currentPoint.legendText = "Current Supply";
+            currentPoint.dataPoints = [{ x: new Date(), y: currentSupply.data / 1000000000, lineColor: "#16463c",  color: "#16463c"}];
+
             data.push(currentPoint);
 
             today = new Date();
