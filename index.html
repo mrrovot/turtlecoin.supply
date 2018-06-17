@@ -2,6 +2,10 @@
 <html lang="en">
 
 <head>
+    <script
+              src="https://code.jquery.com/jquery-3.3.1.min.js"
+              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+              crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,7 +53,7 @@
                     <p>TurtleCoin.supply</p>
                 </div>
                 <div class="message-body">
-                    <div class="columns">
+                    <div class="columns" style="horizontal">
                         <div class="column">
                             Current supply: <strong id="supply"></strong>
                         </div>
@@ -63,13 +67,9 @@
                 </div>
             </article>
         </section>
-        <section id="chart">
-            <canvas id="myChart" width="400" height="400"></canvas>
-        </section>
+        <div id="chartContainer" style="height: 600px; width: 100%;"></div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
-    <script src="https://npmcdn.com/Chart.Zoom.js@latest/Chart.Zoom.min.js
-"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     <script>
     const numberWithCommas = (x) => {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -104,48 +104,66 @@
             document.querySelector("#supply").innerText = numberWithCommas(currentSupply.data);
             document.querySelector("#currentPrice").innerText = `$${usdTrtlPrice}`;
             document.querySelector("#marketCap").innerText = `$${numberWithCommas((usdTrtlPrice*currentSupply.data).toFixed(0))}`;
+            var data = []; var dataSeries = { type: "line", color: "#3cba9f" };
+            var dataPoints = [];
+            for (var i = 0; i <= dates.data.dates.length; i++) {
+             y = supply.data.supply[i];
+             dateTime = new Date(dates.data.dates[i]);
+             dataPoints.push({
+                 x: dateTime,
+                 y: y,
+                 lineColor: "#3cba9f",
+                 color: "#3cba9f"
+               });
+            }
+            dataSeries.showInLegend = true;
+            dataSeries.legendText = "Projected Supply";
+            dataSeries.dataPoints = dataPoints;
 
-            var ctx = document.getElementById("myChart").getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates.data.dates,
-                    datasets: [{
-                        data: supply.data.supply,
-                        label: "Supply (Billion)",
-                        borderColor: "#3cba9f",
-                        fill: false
-                    }]
-                },
-                options: {
-                    title: {
-                        display: true,
-                        text: 'TurtleCoin Supply in Billions'
-                    },
-                    // Container for pan options
-                    // pan: {
-                    //     // Boolean to enable panning
-                    //     enabled: true,
+            data.push(dataSeries);
 
-                    //     // Panning directions. Remove the appropriate direction to disable 
-                    //     // Eg. 'y' would only allow panning in the y direction
-                    //     mode: 'xy'
-                    // },
+            var currentPoint = { type: "line", lineThickness: 10, color: "#16463c" };
+            currentPoint.showInLegend = true;
+            currentPoint.legendText = "Current Supply";
+            currentPoint.dataPoints = [{ x: new Date(), y: currentSupply.data / 1000000000, lineColor: "#16463c",  color: "#16463c"}];
 
-                    // Container for zoom options
-                    zoom: {
-                        // Boolean to enable zooming
-                        enabled: true,
+            data.push(currentPoint);
 
-                        // Zooming directions. Remove the appropriate direction to disable 
-                        // Eg. 'y' would only allow zooming in the y direction
-                        mode: 'x',
-                    }
-
-                }
-
+            today = new Date();
+            var chart = new CanvasJS.Chart("chartContainer",
+            {
+              legend: {
+                horizontalAlign: "left", // "center" , "right"
+                verticalAlign: "center",  // "top" , "bottom"
+                fontSize: 15
+              },
+              zoomEnabled: true,      
+              title:{
+                text: "TurtleCoin Supply Over Time in Billions" 
+              },
+              axisY :{
+                labelFontSize: 18,
+              },
+              axisX:{
+                labelAngle: -30,
+                labelFontSize: 15,
+                viewportMinimum: new Date(today.getFullYear()-1, today.getMonth(), today.getDate()),
+                viewportMaximum: new Date(today.getFullYear()+1, today.getMonth(), today.getDate())
+              },
+              data: data 
 
             });
+            chart.render();
+            var limit = 100000;   
+    
+            var y = 0;
+            var style = "display: inline; background-color: white; color: black; border-color: currentcolor rgb(33, 150, 243) currentcolor currentcolor; border-style: none solid none none; border-width: medium 1px medium medium; border-image: none 100% / 1 / 0 stretch; -moz-user-select: none; padding: 5px 12px; cursor: pointer; float: right; width: 120px; height: 25px; outline: 0px none currentcolor; vertical-align: baseline; line-height: 0; transition: all 0.4s ease 0s;";
+            var zoomoutbutton = $('<button ' + 'style=\"'+style+'\">Zoom Out</button>').click(function () {
+                    chart.options.axisX.viewportMinimum = new Date("2017-12-01");
+                    chart.options.axisX.viewportMaximum = new Date("2112-12-31");
+                    chart.render();
+                });
+            var buttonbar = $(".canvasjs-chart-toolbar").append(zoomoutbutton)
         }));
     </script>
 </body>
@@ -156,12 +174,12 @@
     margin-top: 3em;
 }
 
-#myChart {
-
-    display: table;
-    margin: 0 auto;
-    margin-top: 2em;
-    max-width: 1000px;
-    max-height: 800px;
+.columns {
+        display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.column {
+    text-align: center;
 }
 </style>
