@@ -53,7 +53,7 @@
                     <p>TurtleCoin.supply</p>
                 </div>
                 <div class="message-body">
-                    <div class="columns">
+                    <div class="columns" style="horizontal">
                         <div class="column">
                             Current supply: <strong id="supply"></strong>
                         </div>
@@ -174,12 +174,12 @@
     margin-top: 3em;
 }
 
-#myChart {
-
-    display: table;
-    margin: 0 auto;
-    margin-top: 2em;
-    max-width: 1000px;
-    max-height: 800px;
+.columns {
+        display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.column {
+    text-align: center;
 }
 </style>
