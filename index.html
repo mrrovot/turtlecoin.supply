@@ -160,7 +160,7 @@
             var style = "display: inline; background-color: white; color: black; border-color: currentcolor rgb(33, 150, 243) currentcolor currentcolor; border-style: none solid none none; border-width: medium 1px medium medium; border-image: none 100% / 1 / 0 stretch; -moz-user-select: none; padding: 5px 12px; cursor: pointer; float: right; width: 120px; height: 25px; outline: 0px none currentcolor; vertical-align: baseline; line-height: 0; transition: all 0.4s ease 0s;";
             var zoomoutbutton = $('<button ' + 'style=\"'+style+'\">Zoom Out</button>').click(function () {
                     chart.options.axisX.viewportMinimum = new Date("2017-12-01");
-                    chart.options.axisX.viewportMaximum = new Date(8640000000000000);
+                    chart.options.axisX.viewportMaximum = new Date("2112-12-31");
                     chart.render();
                 });
             var buttonbar = $(".canvasjs-chart-toolbar").append(zoomoutbutton)
