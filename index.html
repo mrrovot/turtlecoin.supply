@@ -84,26 +84,35 @@
         return axios.get('/supply.json');
     }
 
-    function getCurrentSupply() {
-        return axios.get('https://trtl-explorer.xhub.cloud/q/supply/')
+    // function getCurrentSupply() {
+    //     return axios.get('https://trtl-explorer.xhub.cloud/q/supply/')
+    // }
+
+    // function getTurtleCoinPrice() {
+    //     return axios.get('https://tradeogre.com/api/v1/ticker/BTC-TRTL')
+    // }
+    
+    
+
+    // function getCurrentBitcoinPrice() {
+    //     return axios.get('https://api.coindesk.com/v1/bpi/currentprice.json')
+    // }
+
+     function getMarketData() {
+        return axios.get('https://api.coinmarketcap.com/v2/ticker/2958/')
     }
 
-    function getTurtleCoinPrice() {
-        return axios.get('https://tradeogre.com/api/v1/ticker/BTC-TRTL')
-    }
+    axios.all([getMarketData(), getDates(), getSupply()])
+        .then(axios.spread(function(marketData, dates, supply, ) {
+            // btc_price = bitcoinPrice.data.bpi.USD.rate_float;
+            // trtl_price = turtleCoinPrice.data.price;
+            // usdTrtlPrice = (btc_price * trtl_price).toFixed(8);
+            document.querySelector("#supply").innerText = numberWithCommas(marketData.data.data.circulating_supply);
+            document.querySelector("#currentPrice").innerText = `$${marketData.data.data.quotes.USD.price.toFixed(6)}`;
+            document.querySelector("#marketCap").innerText = `$${numberWithCommas(marketData.data.data.quotes.USD.market_cap.toFixed(0))}`;
 
-    function getCurrentBitcoinPrice() {
-        return axios.get('https://api.coindesk.com/v1/bpi/currentprice.json')
-    }
-
-    axios.all([getCurrentSupply(), getTurtleCoinPrice(), getCurrentBitcoinPrice(), getDates(), getSupply()])
-        .then(axios.spread(function(currentSupply, turtleCoinPrice, bitcoinPrice, dates, supply, ) {
-            btc_price = bitcoinPrice.data.bpi.USD.rate_float;
-            trtl_price = turtleCoinPrice.data.price;
-            usdTrtlPrice = (btc_price * trtl_price).toFixed(8);
-            document.querySelector("#supply").innerText = numberWithCommas(currentSupply.data);
-            document.querySelector("#currentPrice").innerText = `$${usdTrtlPrice}`;
-            document.querySelector("#marketCap").innerText = `$${numberWithCommas((usdTrtlPrice*currentSupply.data).toFixed(0))}`;
+            console.log(marketData.data.data.circulating_supply)
+            console.log(marketData.data.data.quotes.USD)
 
             var ctx = document.getElementById("myChart").getContext('2d');
             new Chart(ctx, {
